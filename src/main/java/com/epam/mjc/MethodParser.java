@@ -1,7 +1,9 @@
 package com.epam.mjc;
 
-public class MethodParser {
+import java.util.ArrayList;
+import java.util.List;
 
+public class MethodParser {
     /**
      * Parses string that represents a method signature and stores all it's members into a {@link MethodSignature} object.
      * signatureString is a java-like method signature with following parts:
@@ -20,6 +22,30 @@ public class MethodParser {
      * @return {@link MethodSignature} object filled with parsed values from source string
      */
     public MethodSignature parseFunction(String signatureString) {
-        throw new UnsupportedOperationException("You should implement this method.");
+        List<String> parts = StringSplitter.splitByDelimiters(signatureString, List.of(" ", "(", ")", ","));
+        int startIndex = 0;
+        String accessModifier = null;
+        if (isAccessModifier(parts.get(0))) {
+            accessModifier = parts.get(0);
+            startIndex = 1;
+        }
+
+        String returnType = parts.get(startIndex);
+        String methodName = parts.get(startIndex+1);
+
+        List<MethodSignature.Argument> argumentList = new ArrayList<>();
+
+        for (int i = startIndex + 2; i < parts.size(); i += 2) {
+            String argumentType = parts.get(i);
+            String argumentName = parts.get(i + 1);
+            argumentList.add(new MethodSignature.Argument(argumentType, argumentName));
+        }
+        MethodSignature ret = new MethodSignature(methodName, argumentList);
+        ret.setAccessModifier(accessModifier);
+        ret.setReturnType(returnType);
+        return ret;
+    }
+    private boolean isAccessModifier(String token) {
+        return token.equals("public") || token.equals("private") || token.equals("protected");
     }
 }
